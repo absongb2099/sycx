@@ -1,0 +1,9 @@
+/*
+main
+*/
+.top { background:#50c4e5;height:50px }
+.text { position:absolute;font-size:15px;margin-left:20px;margin-top:20px;color:#333333 }
+.title { position:absolute;font-size:18px;margin-left:10px;margin-top:10px;color:#ffffff }
+body { margin:0 }
+.text:active { opacity:0.6 }
+

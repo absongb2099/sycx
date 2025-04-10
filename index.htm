@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>App</title>
+        <link type="text/css" href="lib/css.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <div id="iApp"></div>
+        <script src="lib/vue.js"></script>
+        <script src="lib/app.js"></script>
+        <script src="lib/iapp.js"></script>
+        <script type="module">
+            const { createApp, ref } = Vue;
+            import AppJS from './main.iyu.js';
+            const App = createApp(AppJS);
+            app.App = App;
+            App.mount('#iApp');
+        </script>
+    </body>
+</html>

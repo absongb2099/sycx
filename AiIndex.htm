@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>畲汉翻译词典</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .header-title {
+            text-align: center;
+            flex-grow: 1;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+        }
+        
+        .search-container {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .search-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+        
+        .search-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .search-button:hover {
+            background-color: #45a049;
+        }
+        
+        .results-container {
+            padding: 10px;
+            background-color: white;
+        }
+        
+        .result-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .hmong-text {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .chinese-text {
+            color: #4CAF50;
+        }
+        
+        .add-form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-title {
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .submit-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        .submit-button:hover {
+            background-color: #0b7dda;
+        }
+        
+        .empty-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    
+    
+    <div class="nav">
+        <div></div>
+        <div>畲语查询</div>
+        <div></div>
+    </div>
+    
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="查询畲语" id="search-input">
+        <button class="search-button" id="search-button">🔍</button>
+    </div>
+    
+    <div class="results-container" id="results-container">
+        <!-- 查询结果将在这里显示 -->
+    </div>
+    
+    
+    <script>
+        // 模拟词典数据
+        let dictionary = [
+//问候、问路、坐车、时间、天气、住店
+
+{ she: "bu6 zu6 o5!", chinese: "你早啊！" },
+{ she: "mung4 hng6 ba6 ho2?", chinese: "你去哪？" },
+{ she: "mung4 hng6 ba6 ho2 lu6?", chinese: "你到哪里来？" },
+{ she: "mung4 lu6 wei2?", chinese: "您来了？" },
+{ she: "cung2 cung2 lung4 gue2?", chinese: "吃饭了吗？" },
+{ she: "lung2 o5/a2 cung2 lung4 ni3!", chinese: "吃了/还没吃呢！" },
+
+{ she: "gu2 lia6 ho2 a4 liu2 o5?", chinese: "在这里玩啊？" },
+{ she: "kie6 la4 a2 cung4 mo2 o5,siong3 a2 bu2 gu2 lia6 ho2 cong2 pu2 mung4.", chinese: "好久不见了，没想到在这里遇到你。" },
+{ she: "lie6 lo5 cong2 pu2 mung4 kie6 hin5.", chinese: "今天遇到你很高兴。" },
+{ she: "lu6 va6 ngin4 in3.", chinese: "来抽根烟吧！" },
+{ she: "fui3 sei2 po6 li4 lu6 ngiung5.", chinese: "快进屋里来坐。" },
+{ she: "lu6 hiu3 yi2 dang5 zang5 ga5 bi1.", chinese: "来休息一会再走。" },
+
+{ she: "li6 pai3 o3 ha3 la3?", chinese: "最近在做什么？" },
+{ she: "li6 pai3 mong3 mong3?", chinese: "近来忙吗？" },
+{ she: "gu2 li4 ngong3 ngong3?", chinese: "家里都好吧？" },
+{ she: "mung4 ko2 ha3 la3 mut4?", chinese: "你叫什么名字？" },
+{ she: "vang6 o5 mut4 ci6 qiu2 xiang2.", chinese: "我的名字是秋香。" },
+{ she: "vang6 gai6 sao6 yi2 dang5,li6 lan4 ci6 lui3 sin5 sang2.", chinese: "我介绍一下，这位是雷老师。" },
+
+{ she: "mung4 ci6 ba6 ho2 lie4?", chinese: "你是哪里人？" },
+{ she: "lie6 ngio3 ma4 bu6 vong4?", chinese: "今年多大了？" },
+{ she: "mung4 dia6 dia6 han6?", chinese: "你有空吗？" },
+{ she: "a2 kue6 mung4.", chinese: "谢谢你！" },
+{ she: "du2 a2 ci2.", chinese: "对不起。" },
+{ she: "li6 lang5 ti2 fong6 ko2 ha3 la3?", chinese: "这个地方叫什么？" },
+
+{ she: "mung4 ngiong6 hng6 ba6 ho2?", chinese: "你要去哪里？" },
+{ she: "mi4 lia6 ho2 ci6 ci6 ti6 hi1?", chinese: "你们这里是不是横河镇？" },
+{ she: "hng6 zong5 bui4 hng6 ba6 ngin4 gia1?", chinese: "去嶂背走哪条路？" },
+{ she: "hng6 gia6 dang5 cung2 go3 zja3,a2 bie5 mung4 bie5 bie5.", chinese: "走小路更近，不知道你知不知道路。" },
+{ she: "vang6 ngiong6 hng6 zi2 su2 li4,ban6 du5 hng6?", chinese: "我要去支书家，怎么走？" },
+{ she: "mung4 gui5 vang6 hng6 ngong3 ngong3?", chinese: "你带我去，好吗？" },
+
+{ she: "lia6 fu6 kun6 ma4 ma4 ga6 li4?", chinese: "这附近有厕所吗？" },
+{ she: "hng6 hok5 tong6 ci6 ci6 gu2 lia6 ho2 hng6?", chinese: "去学校是从这里去吗?" },
+{ she: "zin4 zin4 fu4 gu2 ba6 ho2?", chinese: "镇政府在哪里？" },
+{ she: "ti6 hi6 ca2 can6 gat5 lia6 ho2 gua5 gua5?", chinese: "横河车站离这里远吗？" },
+{ she: "tai6 kio6 ngiong6 hng6 ma4 bu6 la5?", chinese: "大概要走多久？" },
+{ she: "lia6 ho2 vang6 zja6 a2 kie6 diu3.", chinese: "这里我也不太熟。" },
+
+{ she: "vang6 a2 kie6 bie5,mung4 lo6 dang5 ga2 cie6 lie4 o5.", chinese: "我不太清楚，你问问别人吧！" },
+{ she: "a2 gua5,hng6 bu6 fun2 zung2 yi2 su3 o5.", chinese: "不远，走几分钟就到了。" },
+{ she: "ma4 diang6 gua5,ngiung5 ca2 hng6 a6.", chinese: "有点远，走车去吧。" },
+{ she: "mi4 hng6 cu5 gia6 o5.", chinese: "你们走错路了！" },
+{ she: "ma3 fan3 gui5 yi2 dang5 gia1,vang6 hng6 cu5 gia6 o5.", chinese: "" },
+{ she: "", chinese: "麻烦指一下路，我走错路了！" },
+
+{ she: "ciet6 hng6,gu2 ga2 ta4 o3 hiong5 hng6 yi2 su3 o5.", chinese: "直走，在前面右转就到了。" },
+{ she: "gu2 lia6 ho2 gun3 hng6 yi2 mo2 pu2 o5.", chinese: "从这里出去就看见了。" },
+{ she: "cung2 cung2 mo2 pu2 ga2 ta4 wu6 dung5 mu6 li4,wu6 da5 ho2 yi2 ci6 .", chinese: "看见前面那栋木房子没有？那就是！" },
+{ she: "gu2 lia6 ho2 ko4 ko4 yi2 gua3 hng6?", chinese: "从这里可以过去吗？" },
+{ she: "ma4 yi2 diung6 di6 tu2 yi2 ngong3 o5.", chinese: "有一地图就好了！" },
+{ she: "ca2 can6 gu2 ba6 ho2?", chinese: "请问车站在哪里？" },
+
+{ she: "vang6 ngiong6 hng6 bo5 lo6 gu2 ba6 ho2 ngiung5 ca2?", chinese: "我要去博罗，在哪里搭车？" },
+{ she: "gu2 gia6 go6 lan3 ca2 yi2 ko4 yi2 o5.", chinese: "在路边拦车就可以了。" },
+{ she: "si5 fu2,ma3 fan3 song3 vang6 su3 ca2 can1.", chinese: "师傅，麻烦送我到车站。" },
+{ she: "ko4 ko4 yi2 kei5 fui3 yi2 dang5,vang6 gon4 si3 gan2.", chinese: "能不能开快一点，我赶时间。" },
+{ she: "kie5 man2 diang1,gia6 go2.", chinese: "开慢点，路滑。" },
+{ she: "li6 ngin4 gia6 kie6 song6 siet4 ca2.", chinese: "这条路经常堵车。" },
+
+{ she: "mung4 ngiong6 mo6 ba6 ho2 o5 ca2 pio4?", chinese: "你要买哪里的车票？" },
+{ she: "vang6 mo6 wu5 diung6 hng6 dung6 gon3 o5 ca2 pio4,ma4 bu6 wu3 cin4?", chinese: "我买两张去东莞的车票，多少钱？" },
+{ she: "san5 dio4 cin4 yi2 diung1,mung4 ngiong6 ma4 bu6 diung1?", chinese: "三十元一张，你要几张？" },
+{ she: "lie6 hie2 cung2 ma4 ma4 hng6 gong5 ziu2 o5 ca2?", chinese: "现在还有没有去广州的车？" },
+{ she: "zi4 bio2 yi2 ban2 ca2 ci6 ha3 la3 ci4 ko2?", chinese: "最晚一班车是什么时候？" },
+{ she: "vang6 siong3 bo2 mung4 o5 ca2 hng6 lung6 mun6 hng6 a2 hng6?", chinese: "我想包你的车去龙门，去不去？" },
+
+{ she: "lia6 ho2 su3 gong5 ziu2 ngiong6 ma4 bu6 la5?", chinese: "从这里到广州要多久？" },
+{ she: "lie6 hie2 tong2 gao2 sut2,tai6 koi6 yi2 lang5 zung2 tiu3 yi2 su3.", chinese: "现在通高速了，大概一个小时就到。" },
+{ she: "mung4 ci6 ha3 la3 ci4 ko2 o5 ca2 pio4?", chinese: "你是什么时候的车票？" },
+{ she: "vang6 ci6 wu6 lo5 lo6 gang6 ci4 kiu4 din3 zung6 o5 ca2.", chinese: "我是后天晚上九点的车。" },
+{ she: "ngong3 coi3,zang6 diang6 yi2 kio4 a2 dia3 ca2.", chinese: "幸好，差点就赶不上车了。" },
+{ she: "li6 ga4 ca2 hng6 hng6 fu6 zin5?", chinese: "这个车去湖镇吗？" },
+
+{ she: "si5 fu2,su2 can6 yi2 ko2 vang6 yi2 dang5.", chinese: "师傅，到站了你就叫我一下！" },
+{ she: "ma4 ma4 vang6 ho6 tiong5 ca2 o5?Su3 can6 o5.", chinese: "有没有横河下车的？到站了。" },
+{ she: "ma3 fan3 tin2 yi2 dang5,vang6 gu2 lia6 ho2 tiong5 ca2.", chinese: "麻烦停一下，我在这里下车。" },
+{ she: "vang6 hiu6 hong6 ca2.", chinese: "我会晕车。" },
+{ she: "lie6 lo5 ci6 ha3 la3 hao1?", chinese: "今天是几号？" },
+{ she: "lie6 lo5 ci6 giong3 lie3 cot6 sit1,jiao6 su2 jiet4.", chinese: "今天是九月十号，教师节。" },
+
+
+{ she: "lai6 lo5 ci6 lung3 liet6 giong3 lie3 cot6 giu2,cung6 zyong6.", chinese: "明天农历九月九，重阳节。" },
+{ she: "lie6 hie2 ma4 bu6 din3?", chinese: "现在几点了？" },
+{ she: "cung2 zang6 bi5 fun2 zung2 yi2 zji2 din3.", chinese: "还差五分钟就八点。" },
+{ she: "lan3 kiu3 bi4 sai6 ma4 bu6 din3 kiang6 kua6?", chinese: "篮球比赛几点开始？" },
+{ she: "ngan2 ngan2 go3 din3,cung2 zu6 ni3.", chinese: "刚刚六点，还早呢。" },
+{ she: "lie6 ngio3 ci6 hiu3 ngio3,lai6 ngio3 ci6 gue5 ngio3.", chinese: "今年猴年，明年是鸡年。" },
+
+{ she: "lie6 ngio3 run6 soi2 lie3.", chinese: "今年闰四月。" },
+{ she: "ha6 lang5 lie3 lo5 lung3 liet6 cot6 san6 ci6 ngong3 lo5.", chinese: "下个月农历初三是好日子。" },
+{ she: "mung4 ba6 lo5 o3 ngio4 ti2 do3?", chinese: "你哪天生日？" },
+{ she: "lie6 hie2 ha3 la3 ci4 ko2?", chinese: "现在什么时辰？" },
+{ she: "mung4 die6 ci4 dia6 han6 yi2 hie2 lung4 gue2.", chinese: "你什么时候有空？一起吃饭。" },
+{ she: "ba5 lo5 lo5 dia3 zji2 lang5 zung2 tiu2 o5 ban2.", chinese: "我们每天上班八个小时。" },
+
+{ she: "cung2 a2 la2 go3 din3 zung6 vang6 yi2 ki6 sin4 o5.", chinese: "还没到六点我就起床了。" },
+{ she: "za3 mung3 mung4 hng6 o3 ha3 la3 lu6?", chinese: "昨晚你干什么去了？" },
+{ she: "lie6 mung4 ha3 la3 ci4 ko2 ho5 gon5 li4?", chinese: "今晚什么时候回家？" },
+{ she: "lai6 lo5 zja6 sin2 ki3 lot4 ngiet4 o5,zin2 ci6 fui3 a6!", chinese: "明天又到周末了，真快啊！" },
+{ she: "ngi6 fun2 zung2 ko4 ko4 yi2 su3 a6 ho2?", chinese: "二十分钟可以到那里吗？" },
+{ she: "mung4 ho5 gon5 ma4 bu6 la4?", chinese: "二十分钟可以到那里吗？" },
+
+{ she: "mung4 ho5 gon5 ma4 bu6 la4?", chinese: "你回来多久了？" },
+{ she: "vang6 ho5 gon5 ba5 bi2 lo5 o5,gua3 bu6 lo5 yi2 ga5 bi1.", chinese: "我回来三四天了，过几天就走。" },
+{ she: "lia6 ho2 dung6 ha6 bi5 din3 a2 su3 yi2 bio2 o5.", chinese: "这里冬天五点不到就天黑了。" },
+{ she: "zai6 gua3 yi2 lang5 lie3 lo5 yi2 gua3 ngio3 o5.", chinese: "再过一个月就过年了。" },
+{ she: "guang4 sit6 ban6 du5?", chinese: "天气怎么样？" },
+{ she: "lie6 lo5 guang4 sit6 kie6 ngong3.", chinese: "今天天气很好。" },
+
+{ she: "gun3 lo5 go6 o5.", chinese: "出太阳了。" },
+{ she: "ban2 guang4 o5,ngiong6 lu6 lung6 o5.", chinese: "变天了，要下雨了。" },
+{ she: "li6 ca6 lung6 lu6 gung6 kie6 vong4!", chinese: "这场雨下得很大！" },
+{ she: "gun3 lo3 cung2 lu6 lu6 lung1?", chinese: "外面还下不下雨？" },
+{ she: "za3 mung3 lu6 o5 yi2 mung3 o5 bang3.", chinese: "昨晚下了一晚的雪。" },
+{ she: "lie6 lo5 lo5 go6 kie6 vong4,gui5 lang5 zon3 gun3 kong4.", chinese: "今天太阳很大，带个帽子出门。" },
+
+{ she: "tian2 hi6 bao6 gao6 gung6 li6 bu6 lo5 yi2 ma4 lung6.", chinese: "天气预报说这几天都会有雨。" },
+{ she: "gi5 du3 gui5 so6 hiu6 lu6 lung6.", chinese: "记得带伞，会下雨。" },
+{ she: "yi2 diang6 ki3 ca2 ma4,kie6 got5 ki2.", chinese: "一点风都没有，很闷热！" },
+{ she: "lie6 lo5 kie6 kang5,gun3 o5 yi2 sin5 ong5 ngiung2.", chinese: "今天好热，出了一身汗。" },
+{ she: "lie6 lo5 ci6 tai6 su4,gai6 a3 ci2 die4 bu6 kang5.", chinese: "今天是大暑，怪不得这么热！" },
+{ she: "li6 pai3 giong3 ki6 lu6 o5,ngiong6 li6 wu3 diang1.", chinese: "最近冷起来了，要多穿点。" },
+
+{ she: "kie6 giong3 a6 fui3 sei2 lu6 da3 to6.", chinese: "好冷啊，快来烤火。" },
+{ she: "lie6 lo5 bi5 za3 lo6 su6 yi2 diang1.", chinese: "今天比昨天暖和一点。" },
+{ she: "vang6 a2 zung6 yi3 dung6 ha1,kie6 giong3 o5.", chinese: "我不喜欢冬天，太冷了。" },
+{ she: "ba5 lia6 ho2 yi2 ngio3 bi2 gui4 yi2 kie6 liu5.", chinese: "我们这里一年四季都凉快。" },
+{ she: "lie6 ngio3 kie6 gon2 cao1,ngiong6 zu6 yi6 fong3 to6.", chinese: "今年太干燥了，要注意防火。" },
+{ she: "li6 pai3 lung6 wu3,gu2 li4 kie6 da6 ong5.", chinese: "最近雨多，家里很潮湿。" },
+
+{ she: "su3 tian6 lia6 ho2 kie6 song6 bo2 ong5 mie2.", chinese: "夏天这里经常发洪水。" },
+{ she: "bie6 fu5 ko2 o5,kuang4 giang5 tian6 si6.", chinese: "打雷了，关掉电视。" },
+{ she: "lie6 ngio3 kie6 giong3,zi5 bi6 yi2 dung6 ta6 o5.", chinese: "今年很冻，香蕉都冻死了。" },
+{ she: "lia6 ho2 ma4 ma4 ngong3 yi2 diang6 o5 bin2 gon5?", chinese: "这里有好一点的宾馆吗？" },
+{ she: "mung4 ngiong6 giu2 o5 yit5 gi5 pian6 yi6 o5?", chinese: "你要贵的还是便宜的？" },
+{ she: "lia6 ho2 zi4 ngong3 o5 ci6 ho3 hai3 ziu4 dian1.", chinese: "这里最好的是和谐酒店。" },
+
+{ she: "fut6 mu6 yuan3,lia6 ho2 cung2 ma4 ma4 fong6 gan1?", chinese: "服务员，这里还有房间吗？" },
+{ she: "m2 ma3 fong6 gan6 o5,mung4 hng6 gua3 da4 ho2 mo2 yi2 dang5.", chinese: "没有房间了，你去别处看看。" },
+{ she: "cung2 ma4,mung4 ngiong6 ma4 bu6 gi5?", chinese: "还有，你要几间？" },
+{ she: "di6 yi2 mung3 ma4 bu6 wu3 cin4?", chinese: "住一晚多少钱？" },
+{ she: "yi2 mung3 yi2 ba3 dio4 cin4,mung4 ngiong6 di6 ma4 bu6 mung3?", chinese: "一晚一百元，你要住几晚？" },
+{ she: "ma4 ma4 pian6 yi6 diang6 o5 fong6 gan1?", chinese: "有没有便宜点的房间？" },
+
+{ she: "lie6 hie2 yi2 ci6 mui2 ton3 ga5 o5.", chinese: "现在已经是美团价了。" },
+{ she: "zi4 pian6 yi6 o5 liu2 dio4 cin4,mung4 di6 di6?", chinese: "最便宜的60元，你住不住？" },
+{ she: "vang6 ko4 ko4 yi2 ga2 ta4 mo2 yi2 dang5 fong6 gan1?", chinese: "我可以先看一下房间吗？" },
+{ she: "kuan2 mung4 o5 sin2 fun6 zin6 bang3 vang6 dian2 gi6 yi2 dang5.", chinese: "拿你的身份证给我登记一下。" },
+{ she: "ngiong6 gao2 ma4 bu6 wu3 ak5 gin2?", chinese: "要交多少押金？" },
+{ she: "mung4 ci6 cat4 ka3 yit5 gi5 bang3 cin4?", chinese: "你是刷卡还是交现金？" },
+
+{ she: "ba5 lia6 ho2 a2 cat4 ka3,bang3 cin4.", chinese: "我们这里不刷卡，交现金。" },
+{ she: "li6 diang6 ci6 fong3 ka3 gong4 zao4 can2 pio4,mung4 kuan2 ngong3.", chinese: "这是房卡和早餐票，你拿好。" },
+{ she: "mung4 kin6 yi2 dang5 mi6 ma2.", chinese: "你按一下密码。" },
+{ she: "vang6 siong3 vui2 yi2 gi5 vong4 yi2 diang6 o5 fong6 gan1.", chinese: "我想换大一点的房间。" },
+{ she: "ci6 mung4 di6 han3 ci6 ga2 cie6 lie4 di6?", chinese: "是你住还是别人住？" },
+{ she: "li6 gi5 fong6 gan6 a2 cu5,cung2 ma4 wifi.", chinese: "这房间不错，还有WIFI." },
+{ she: "vang6 ngiong6 tui6 fong6 bong2 vang6 kie5 fat4 pio4 o5.", chinese: "我要退房，帮我开发票吧。" },
+
+//明天补充…
+
+        ];
+
+        // DOM 元素
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsContainer = document.getElementById('results-container');
+        const hmongWordInput = document.getElementById('hmong-word');
+        const chineseWordInput = document.getElementById('chinese-word');
+        const addButton = document.getElementById('add-button');
+
+        // 搜索功能
+        function searchDictionary() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                resultsContainer.innerHTML = '<div class="empty-results">请输入搜索内容</div>';
+                return;
+            }
+            
+            const results = dictionary.filter(item => 
+                item.she.toLowerCase().includes(searchTerm) || 
+                item.chinese.toLowerCase().includes(searchTerm)
+            );
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="empty-results">没有找到相关结果</div>';
+                return;
+            }
+            
+            displayResults(results);
+        }
+
+        // 显示查询结果
+        function displayResults(results) {
+            resultsContainer.innerHTML = '';
+            
+            results.forEach(item => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <div class="she-text">${item.she}</div>
+                    <div class="chinese-text">${item.chinese}</div>
+                `;
+                resultsContainer.appendChild(resultItem);
+            });
+        }
+
+
+
+        // 事件监听
+        searchButton.addEventListener('click', searchDictionary);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchDictionary();
+            }
+        });
+    </script>
+</body>
+</html>
